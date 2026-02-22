@@ -1,0 +1,41 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name: eks-cluster
+  region: eu-south-1
+  version: 1.35
+
+nodeGroups:
+  - name: workers
+    instanceType: t3.medium
+    desiredCapacity: 2
+    minSize: 1 
+    maxSize: 2
+    volumeSize: 20
+    volumeType: gp3
+    labels: 
+      purpose: dev
+      team: java
+    taints:
+      - key: "dedicated"
+        value: "dev"
+        effect: "PreferNoSchedule"
+    iam:
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+      ssh:
+        allow: false 
+
+addons:
+  - name: vpc-cni
+    version: "v1.14.7-eksbuild.1"
+  - name: coredns
+    version: "v1.12.0-eksbuild.1"
+  - name: kube-proxy
+    version: "v1.35.3-eksbuild.1"
+
+cloudWatch:
+  clusterLogging:
+    enableTypes: ["api", "audit","authenticator","controllerManager","scheduler"]
